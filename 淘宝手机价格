@@ -1,0 +1,50 @@
+import requests
+import re
+
+def getHtmlText(url):
+    try:
+        r=requests.get(url,timeout=10)
+        r.raise_for_status()
+        r.encoding=r.apparent_encoding
+        return r.text
+
+    except:
+        print('fail to get html')
+
+def paesePage(goods,html):
+    try:
+        title=re.findall(r'\"title\"\:\".*?\"',html)
+        price=re.findall(r'\"price\"\:\"\d+\"',html)
+
+        for i in range(len(title)):
+            t=eval(title[i].split(':')[1])
+            p=eval(price[i].split(':')[1])
+            goods.append([t,p])
+
+    except:
+        print('fail to get goods info')
+
+def printGoodsInfo(goods):
+    tplt = "{:4}\t{:8}\t{:16}"
+
+    print(tplt.format("序号", "价格", "商品名称"))
+
+    count=0
+    for g in goods:
+        count+=1
+        print(tplt.format(count,g[1],g[0]))
+
+key='手机'
+depth=3
+goods=[]
+start_url = 'https://s.taobao.com/search?q=' + key
+
+for i in range(depth):
+    try:
+        url=start_url+'&s='+str(i*48)
+        html=getHtmlText(url)
+        paesePage(goods,html)
+    except:
+        continue
+
+printGoodsInfo(goods)
