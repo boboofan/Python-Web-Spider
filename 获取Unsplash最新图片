@@ -35,6 +35,7 @@ def downloadImg(list_img,kv):
             img_name=list_img[i].split('-')[1]+'.jpg'
             with open(path+'/'+img_name,'wb') as f:
                 f.write(r.content)
+            print('下载成功..')
     except:
         print('fail to download img')
 
