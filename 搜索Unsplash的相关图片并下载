@@ -1,0 +1,52 @@
+import re
+import requests
+import os
+
+def getHtmlText(url,kv):
+    try:
+        r=requests.get(url,headers=kv,timeout=20)
+        r.raise_for_status()
+        r.encoding=r.apparent_encoding
+        return r.text
+    except:
+        print('fail to get html')
+
+def getImgUrl(html):
+    list_img=re.findall('https://images.unsplash.com/photo-\\d+-\\w+?\?',html)
+    for i in range(len(list_img)):
+        list_img[i]=list_img[i].split('?')[0]
+    return list_img
+
+def downloadImg(list_img,key,kv):
+    path='D:/360data/重要数据/桌面/'+key
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path)
+    except:
+        print('fail to create folder')
+
+    try:
+        for i in range(len(list_img)):
+            r=requests.get(list_img[i],headers=kv,timeout=20) #由于访问速度的问题，如未通过科学上网，可能会出现下载速度慢，下载失败的问题
+            r.raise_for_status()
+            r.encoding=r.apparent_encoding
+
+            img_name=list_img[i].split('-')[1]+'.jpg'
+            with open(path+'/'+img_name,'wb') as f:
+                f.write(r.content)
+            print('下载成功..')
+    except:
+        print('fail to download img')
+
+def main():
+    url='https://unsplash.com/search/photos/'
+    key=input('请输入要搜索图片的名字：')
+    kv = {'user-agent': 'Mozilla/5.0'}
+    html=getHtmlText(url+key,kv)
+    list_img=getImgUrl(html)
+    if len(list_img)==0:
+        print('未找到相关图片')
+    else:
+        downloadImg(list_img,key,kv)
+
+main()
